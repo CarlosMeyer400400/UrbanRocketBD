@@ -760,7 +760,9 @@
         try {
             const res  = await fetch(GOOGLE_URL);
             const data = await res.json();
-            allProducts = data;
+           
+
+          allProducts = [...data].reverse();
             renderProductos(data);
             updateStats(data);
         } catch (e) {
