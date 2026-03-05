@@ -762,9 +762,10 @@
             const data = await res.json();
            
 
-          allProducts = [...data].reverse();
-            renderProductos(data);
-            updateStats(data);
+              allProducts = [...data].reverse();
+
+        renderProductos(allProducts);
+        updateStats(allProducts);
         } catch (e) {
             console.error(e);
             container.innerHTML = `
