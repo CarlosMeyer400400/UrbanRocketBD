@@ -1,272 +1,74 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gestor de Inventario Pro</title>
-  <style>
-    :root {
-      --primary: #2563eb;
-      --danger: #ef4444;
-      --warning: #f59e0b;
-      --success: #16a34a;
-      --muted: #64748b;
-      --bg: #f8fafc;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestor de Inventario Pro</title>
+    <style>
+        :root { --primary: #2563eb; --danger: #ef4444; --bg: #f8fafc; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        
+        .card { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); width: 100%; max-width: 450px; margin-bottom: 2rem; }
+        h2 { margin: 0 0 1.5rem 0; color: #1e293b; text-align: center; }
+        
+        label { display: block; margin-bottom: 5px; font-size: 0.9rem; color: #64748b; }
+        input { width: 100%; padding: 10px; margin-bottom: 1rem; border: 1px solid #e2e8f0; border-radius: 6px; box-sizing: border-box; }
+        
+        #preview { width: 100%; height: 120px; border: 2px dashed #cbd5e1; border-radius: 6px; margin-bottom: 1rem; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #f1f5f9; }
+        #preview img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .btn-group { display: flex; gap: 10px; }
+        button { flex: 1; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        button.cancel { background: #64748b; }
+        button:disabled { background: #94a3b8; cursor: not-allowed; }
 
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: var(--bg);
-      margin: 0;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .card {
-      background: white;
-      padding: 2rem;
-      border-radius: 12px;
-      box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
-      width: 100%;
-      max-width: 500px;
-      margin-bottom: 2rem;
-    }
-
-    h2 {
-      margin: 0 0 1.5rem 0;
-      color: #1e293b;
-      text-align: center;
-    }
-
-    .section-title {
-      width: 100%;
-      max-width: 900px;
-      margin: 10px 0 10px;
-      color: #1e293b;
-      font-size: 1.2rem;
-      font-weight: 700;
-    }
-
-    label {
-      display: block;
-      margin-bottom: 5px;
-      font-size: 0.9rem;
-      color: #64748b;
-    }
-
-    input {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 1rem;
-      border: 1px solid #e2e8f0;
-      border-radius: 6px;
-      box-sizing: border-box;
-    }
-
-    #preview {
-      width: 100%;
-      height: 140px;
-      border: 2px dashed #cbd5e1;
-      border-radius: 6px;
-      margin-bottom: 1rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      background: #f1f5f9;
-    }
-
-    #preview img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-    }
-
-    .btn-group {
-      display: flex;
-      gap: 10px;
-    }
-
-    button {
-      flex: 1;
-      background: var(--primary);
-      color: white;
-      border: none;
-      padding: 12px;
-      border-radius: 6px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-
-    button.cancel {
-      background: #64748b;
-    }
-
-    button:disabled {
-      background: #94a3b8;
-      cursor: not-allowed;
-    }
-
-    .inventory {
-      width: 100%;
-      max-width: 900px;
-    }
-
-    .product-list {
-      margin-bottom: 28px;
-    }
-
-    .product-item {
-      background: white;
-      padding: 15px;
-      border-radius: 10px;
-      margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-      border: 1px solid #e2e8f0;
-    }
-
-    .product-item.disabled {
-      opacity: 0.8;
-      border-left: 5px solid var(--danger);
-    }
-
-    .product-item.enabled {
-      border-left: 5px solid var(--success);
-    }
-
-    .product-item img {
-      width: 72px;
-      height: 72px;
-      border-radius: 6px;
-      object-fit: cover;
-      background: #eee;
-    }
-
-    .product-info {
-      flex-grow: 1;
-    }
-
-    .product-info h4 {
-      margin: 0;
-      color: #1e293b;
-      font-size: 1rem;
-    }
-
-    .product-price {
-      margin: 4px 0;
-      color: #2563eb;
-      font-weight: bold;
-    }
-
-    .product-meta {
-      margin: 0;
-      color: var(--muted);
-      font-size: 0.9rem;
-    }
-
-    .badge {
-      display: inline-block;
-      font-size: 0.75rem;
-      font-weight: 700;
-      padding: 4px 10px;
-      border-radius: 999px;
-      margin-top: 6px;
-    }
-
-    .badge-ok {
-      background: #dcfce7;
-      color: #166534;
-    }
-
-    .badge-off {
-      background: #fee2e2;
-      color: #991b1b;
-    }
-
-    .product-actions {
-      display: flex;
-      gap: 5px;
-      flex-wrap: wrap;
-    }
-
-    .btn-sm {
-      padding: 8px 12px;
-      font-size: 0.75rem;
-      border-radius: 4px;
-      border: none;
-      cursor: pointer;
-      color: white;
-      font-weight: bold;
-    }
-
-    .btn-edit {
-      background: var(--warning);
-    }
-
-    .btn-del {
-      background: var(--danger);
-    }
-
-    .empty-box {
-      background: white;
-      border: 1px dashed #cbd5e1;
-      color: #64748b;
-      padding: 20px;
-      border-radius: 10px;
-      text-align: center;
-      margin-bottom: 16px;
-    }
-  </style>
+        .inventory { width: 100%; max-width: 600px; }
+        .product-item { background: white; padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; align-items: center; gap: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
+        .product-item img { width: 60px; height: 60px; border-radius: 4px; object-fit: cover; background: #eee; }
+        .product-info { flex-grow: 1; }
+        .product-info h4 { margin: 0; color: #1e293b; font-size: 1rem; }
+        .product-info p { margin: 4px 0 0 0; color: #2563eb; font-weight: bold; }
+        .product-actions { display: flex; gap: 5px; }
+        .btn-sm { padding: 8px 12px; font-size: 0.75rem; border-radius: 4px; border: none; cursor: pointer; color: white; font-weight: bold; }
+        .btn-edit { background: #f59e0b; }
+        .btn-del { background: var(--danger); }
+    </style>
 </head>
 <body>
 
-  <div class="card">
+<div class="card">
     <h2 id="formTitle">Nuevo Producto</h2>
     <form id="productForm">
-      <input type="hidden" id="editMode" value="false">
-      <input type="hidden" id="oldId">
-      <input type="hidden" id="currentImageUrl">
+        <input type="hidden" id="editMode" value="false">
+        <input type="hidden" id="oldName">
 
-      <label>Nombre del Producto</label>
-      <input type="text" id="nombre" placeholder="Ej. Cartera un Show Mas" required>
+        <label>Nombre del Producto</label>
+        <input type="text" id="nombre" placeholder="Ej. Cartera un Show Mas" required>
 
-      <label>Precio Público ($)</label>
-      <input type="number" id="precio" placeholder="130" required>
+        <label>Precio Público ($)</label>
+        <input type="number" id="precio" placeholder="130" required>
 
-      <label>Stock</label>
-      <input type="number" id="stock" min="0" value="1" required>
+        <label>Imagen del Producto</label>
+        <input type="file" id="foto" accept="image/*">
+        <input type="hidden" id="currentImageUrl">
+        
+        <div id="preview"><span id="textPreview">Sin imagen seleccionada</span></div>
 
-      <label>Orden de visualización</label>
-      <input type="number" id="orden" min="1" placeholder="1">
-
-      <label>Imagen del Producto</label>
-      <input type="file" id="foto" accept="image/*">
-
-      <div id="preview"><span id="textPreview">Sin imagen seleccionada</span></div>
-
-      <div class="btn-group">
-        <button type="submit" id="btnEnviar">GUARDAR EN EXCEL</button>
-        <button type="button" id="btnCancelar" class="cancel" style="display:none;">CANCELAR</button>
-      </div>
+        <div class="btn-group">
+            <button type="submit" id="btnEnviar">GUARDAR EN EXCEL</button>
+            <button type="button" id="btnCancelar" class="cancel" style="display:none;">CANCELAR</button>
+        </div>
     </form>
-  </div>
+</div>
 
-  <div class="inventory">
-    <div class="section-title">Productos habilitados</div>
-    <div id="listaHabilitados" class="product-list">Cargando productos...</div>
+<div class="inventory">
+    <h2 style="font-size: 1.2rem; text-align: left;">Inventario Actual</h2>
+    <div id="listaProductos">Cargando productos...</div>
+</div>
 
-    <div class="section-title">Productos no habilitados</div>
-    <div id="listaInhabilitados" class="product-list">Cargando productos...</div>
-  </div>
-
-  <script>
-    const CLOUD_NAME = 'dykirxwoc';
+<script>
+    // --- CONFIGURACIÓN ---
+    const CLOUD_NAME = 'dykirxwoc'; 
     const UPLOAD_PRESET = 'ltdb68xs';
     const GOOGLE_URL = 'https://script.google.com/macros/s/AKfycbwTiZXOpzIO3G51nbJ5poa4NiByyjhqUAlnLuuj6NM_N8mBe2pxzv2WOgs6MaRI1C_VAQ/exec';
 
@@ -274,211 +76,146 @@
     const preview = document.getElementById('preview');
     const fotoInput = document.getElementById('foto');
 
-    let currentProducts = [];
-
-    function delay(ms) {
-      return new Promise(resolve => setTimeout(resolve, ms));
-    }
-
-    function toNumber(value, fallback = 0) {
-      const n = Number(value);
-      return Number.isNaN(n) ? fallback : n;
-    }
-
-    function normalizeProduct(p) {
-      const id = p.id ?? p.ID ?? '';
-      const nombre = p.nombre ?? p.Nombre ?? 'Sin nombre';
-      const precio = p.precio_publico ?? p.Precio_publico ?? 0;
-      const imagen = p.imagen ?? p.Imagen ?? '';
-      const stock = toNumber(p.stock ?? p.Stock, 0);
-      const orden = toNumber(p.orden ?? p.Orden, toNumber(id, 999999));
-
-      let estado = (p.estado ?? p.Estado ?? '').toString().trim().toLowerCase();
-      if (stock <= 0) estado = 'inhabilitado';
-      else if (estado !== 'inhabilitado') estado = 'habilitado';
-
-      return { id, nombre, precio, imagen, stock, orden, estado };
-    }
-
-    function resetForm() {
-      document.getElementById('formTitle').innerText = 'Nuevo Producto';
-      document.getElementById('editMode').value = 'false';
-      document.getElementById('oldId').value = '';
-      document.getElementById('nombre').value = '';
-      document.getElementById('precio').value = '';
-      document.getElementById('stock').value = '1';
-      document.getElementById('orden').value = '';
-      document.getElementById('currentImageUrl').value = '';
-      document.getElementById('btnEnviar').innerText = 'GUARDAR EN EXCEL';
-      document.getElementById('btnCancelar').style.display = 'none';
-      fotoInput.value = '';
-      preview.innerHTML = '<span id="textPreview">Sin imagen seleccionada</span>';
-    }
-
-    async function enviarAGoogle(payload) {
-      await fetch(GOOGLE_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8'
-        },
-        body: JSON.stringify(payload)
-      });
-
-      await delay(1200);
-    }
-
-    function renderList(containerId, products, enabled) {
-      const container = document.getElementById(containerId);
-
-      if (!products.length) {
-        container.innerHTML = `<div class="empty-box">No hay productos ${enabled ? 'habilitados' : 'inhabilitados'}.</div>`;
-        return;
-      }
-
-      container.innerHTML = products.map(p => `
-        <div class="product-item ${enabled ? 'enabled' : 'disabled'}">
-          <img src="${p.imagen}" onerror="this.src='https://via.placeholder.com/72?text=Error'">
-          <div class="product-info">
-            <h4>${p.nombre}</h4>
-            <p class="product-price">$${p.precio}</p>
-            <p class="product-meta">Stock: ${p.stock} · Orden: ${p.orden} · ID: ${p.id}</p>
-            <span class="badge ${enabled ? 'badge-ok' : 'badge-off'}">
-              ${enabled ? 'HABILITADO' : 'INHABILITADO'}
-            </span>
-          </div>
-          <div class="product-actions">
-            <button class="btn-sm btn-edit" onclick="prepararEdicion('${p.id}')">Editar</button>
-            <button class="btn-sm btn-del" onclick="eliminar('${p.id}', '${p.nombre.replace(/'/g, "\\'")}')">Borrar</button>
-          </div>
-        </div>
-      `).join('');
-    }
-
+    // 1. CARGAR PRODUCTOS (READ)
     async function cargarProductos() {
-      const habilitadosEl = document.getElementById('listaHabilitados');
-      const inhabilitadosEl = document.getElementById('listaInhabilitados');
+        const container = document.getElementById('listaProductos');
+        try {
+            const res = await fetch(GOOGLE_URL);
+            const data = await res.json();
+            container.innerHTML = '';
 
-      habilitadosEl.innerHTML = 'Cargando...';
-      inhabilitadosEl.innerHTML = 'Cargando...';
+            if (data.length === 0) {
+                container.innerHTML = '<p style="text-align:center; color:#64748b;">No hay productos en el Excel.</p>';
+                return;
+            }
 
-      try {
-        const res = await fetch(GOOGLE_URL);
-        const data = await res.json();
+            data.forEach(p => {
+                // Ajustamos las claves a minúsculas porque el script de Google las convierte así
+                const nombre = p.nombre || p.Nombre || "Sin nombre";
+                const precio = p.precio || p.precio_publico || "0";
+                const imagen = p.imagen || p.Imagen || "";
 
-        currentProducts = (data || [])
-          .map(normalizeProduct)
-          .sort((a, b) => a.orden - b.orden || Number(a.id) - Number(b.id));
-
-        const habilitados = currentProducts.filter(p => p.estado === 'habilitado');
-        const inhabilitados = currentProducts.filter(p => p.estado !== 'habilitado');
-
-        renderList('listaHabilitados', habilitados, true);
-        renderList('listaInhabilitados', inhabilitados, false);
-      } catch (e) {
-        console.error(e);
-        habilitadosEl.innerHTML = '<div class="empty-box" style="color:red;">Error al conectar con el Excel.</div>';
-        inhabilitadosEl.innerHTML = '<div class="empty-box" style="color:red;">Error al conectar con el Excel.</div>';
-      }
+                container.innerHTML += `
+                    <div class="product-item">
+                        <img src="${imagen}" onerror="this.src='https://via.placeholder.com/60?text=Error'">
+                        <div class="product-info">
+                            <h4>${nombre}</h4>
+                            <p>$${precio}</p>
+                        </div>
+                        <div class="product-actions">
+                            <button class="btn-sm btn-edit" onclick="prepararEdicion('${nombre}', '${precio}', '${imagen}')">Editar</button>
+                            <button class="btn-sm btn-del" onclick="eliminar('${nombre}')">Borrar</button>
+                        </div>
+                    </div>`;
+            });
+        } catch (e) {
+            console.error(e);
+            container.innerHTML = '<p style="color:red; text-align:center;">Error al conectar con el Excel. Revisa la URL y permisos.</p>';
+        }
     }
 
+    // 2. PREVISUALIZACIÓN DE IMAGEN
     fotoInput.addEventListener('change', function() {
-      const file = this.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        preview.innerHTML = `<img src="${e.target.result}">`;
-      };
-      reader.readAsDataURL(file);
-    });
-
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-
-      const btn = document.getElementById('btnEnviar');
-      const isEdit = document.getElementById('editMode').value === 'true';
-
-      btn.disabled = true;
-      btn.innerText = 'PROCESANDO...';
-
-      try {
-        let imageUrl = document.getElementById('currentImageUrl').value;
-        const file = fotoInput.files[0];
-
+        const file = this.files[0];
         if (file) {
-          const fd = new FormData();
-          fd.append('file', file);
-          fd.append('upload_preset', UPLOAD_PRESET);
-
-          const resImg = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
-            method: 'POST',
-            body: fd
-          });
-
-          const dataImg = await resImg.json();
-          imageUrl = dataImg.secure_url;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                preview.innerHTML = `<img src="${e.target.result}">`;
+            };
+            reader.readAsDataURL(file);
         }
-
-        const payload = {
-          action: isEdit ? 'update' : 'create',
-          oldId: document.getElementById('oldId').value,
-          nombre: document.getElementById('nombre').value.trim(),
-          precio: document.getElementById('precio').value,
-          stock: document.getElementById('stock').value,
-          orden: document.getElementById('orden').value,
-          imagen: imageUrl
-        };
-
-        await enviarAGoogle(payload);
-        await cargarProductos();
-        resetForm();
-
-        alert(isEdit ? '¡Producto actualizado!' : '¡Producto guardado!');
-      } catch (err) {
-        console.error(err);
-        alert('Error en el proceso');
-      } finally {
-        btn.disabled = false;
-        btn.innerText = 'GUARDAR EN EXCEL';
-      }
     });
 
-    window.prepararEdicion = function(id) {
-      const p = currentProducts.find(prod => String(prod.id) === String(id));
-      if (!p) return;
+    // 3. GUARDAR (CREATE & UPDATE)
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('btnEnviar');
+        const isEdit = document.getElementById('editMode').value === "true";
+        
+        btn.disabled = true;
+        btn.innerText = "PROCESANDO...";
 
-      document.getElementById('formTitle').innerText = 'Editando Producto';
-      document.getElementById('editMode').value = 'true';
-      document.getElementById('oldId').value = p.id;
-      document.getElementById('nombre').value = p.nombre;
-      document.getElementById('precio').value = p.precio;
-      document.getElementById('stock').value = p.stock;
-      document.getElementById('orden').value = p.orden;
-      document.getElementById('currentImageUrl').value = p.imagen;
-      document.getElementById('btnEnviar').innerText = 'ACTUALIZAR DATOS';
-      document.getElementById('btnCancelar').style.display = 'block';
-      preview.innerHTML = `<img src="${p.imagen}">`;
+        try {
+            let imageUrl = document.getElementById('currentImageUrl').value;
+            const file = fotoInput.files[0];
 
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+            // Subir a Cloudinary solo si hay archivo nuevo
+            if (file) {
+                const fd = new FormData();
+                fd.append('file', file);
+                fd.append('upload_preset', UPLOAD_PRESET);
+
+                const resImg = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+                    method: 'POST',
+                    body: fd
+                });
+                const dataImg = await resImg.json();
+                imageUrl = dataImg.secure_url;
+            }
+
+            const payload = {
+                action: isEdit ? "update" : "create",
+                oldName: document.getElementById('oldName').value,
+                nombre: document.getElementById('nombre').value,
+                precio: document.getElementById('precio').value,
+                imagen: imageUrl
+            };
+
+            // Enviamos a Google Sheets
+            await fetch(GOOGLE_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            alert(isEdit ? '¡Producto actualizado!' : '¡Producto guardado!');
+            location.reload(); 
+
+        } catch (err) {
+            console.error(err);
+            alert('Error en el proceso');
+            btn.disabled = false;
+            btn.innerText = "REINTENTAR";
+        }
+    });
+
+    // 4. ELIMINAR (DELETE)
+    window.eliminar = async (nombre) => {
+        if (!confirm(`¿Estás seguro de eliminar "${nombre}"?`)) return;
+        
+        try {
+            await fetch(GOOGLE_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: JSON.stringify({ action: 'delete', nombre: nombre })
+            });
+            alert('Petición de borrado enviada. Recargando...');
+            setTimeout(cargarProductos, 1500); // Esperar un momento a que Google procese
+        } catch (e) {
+            alert('Error al borrar');
+        }
     };
 
-    window.eliminar = async function(id, nombre) {
-      if (!confirm(`¿Seguro que quieres borrar "${nombre}" permanentemente?`)) return;
-
-      try {
-        await enviarAGoogle({ action: 'delete', id: id });
-        await cargarProductos();
-        alert('Producto eliminado.');
-      } catch (e) {
-        console.error(e);
-        alert('Error al borrar');
-      }
+    // 5. PREPARAR FORMULARIO PARA EDITAR
+    window.prepararEdicion = (n, p, img) => {
+        document.getElementById('formTitle').innerText = "Editando Producto";
+        document.getElementById('nombre').value = n;
+        document.getElementById('precio').value = p;
+        document.getElementById('currentImageUrl').value = img;
+        document.getElementById('oldName').value = n;
+        document.getElementById('editMode').value = "true";
+        document.getElementById('btnEnviar').innerText = "ACTUALIZAR DATOS";
+        document.getElementById('btnCancelar').style.display = "block";
+        preview.innerHTML = `<img src="${img}">`;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
-    document.getElementById('btnCancelar').onclick = resetForm;
+    document.getElementById('btnCancelar').onclick = () => location.reload();
 
+    // Inicializar lista
     cargarProductos();
-  </script>
+</script>
+
 </body>
 </html>
