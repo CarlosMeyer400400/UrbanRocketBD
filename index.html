@@ -899,6 +899,8 @@
         ::-webkit-scrollbar-thumb:hover { background: #a5b4fc; }
     </style>
 </head>
+
+    
 <body>
 
 <!-- HEADER -->
@@ -1001,6 +1003,14 @@
                 <p class="stat-value" id="statMax">—</p>
             </div>
         </div>
+
+        <div style="margin-bottom:12px;">
+    <button type="button" class="btn btn-primary" id="btnDescargarImagenes">
+        <span>⬇️</span>
+        <span>Descargar imágenes</span>
+    </button>
+</div>
+
 
         <div class="search-wrap">
             <span class="search-icon">🔍</span>
@@ -1180,6 +1190,7 @@
         document.removeEventListener('mouseup', stopDrag);
         document.removeEventListener('touchend', stopDrag);
     }
+document.getElementById('btnDescargarImagenes').addEventListener('click', descargarTodasLasImagenes);
 
     // Mover el área de recorte completa
     document.addEventListener('DOMContentLoaded', () => {
@@ -1530,9 +1541,105 @@
     }
 
     document.getElementById('btnCancelar').onclick = resetForm;
+function limpiarNombreArchivo(nombre) {
+    return String(nombre || 'producto')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')   // quita acentos
+        .replace(/[<>:"/\\|?*\x00-\x1F]/g, '') // caracteres inválidos
+        .replace(/\s+/g, '_')
+        .trim()
+        .slice(0, 80) || 'producto';
+}
+
+function obtenerExtensionDesdeUrl(url, mimeType = '') {
+    try {
+        const pathname = new URL(url).pathname;
+        const match = pathname.match(/\.([a-zA-Z0-9]+)$/);
+        if (match) return match[1].toLowerCase();
+    } catch (e) {}
+
+    if (mimeType.includes('png')) return 'png';
+    if (mimeType.includes('webp')) return 'webp';
+    if (mimeType.includes('jpeg') || mimeType.includes('jpg')) return 'jpg';
+    if (mimeType.includes('gif')) return 'gif';
+
+    return 'jpg';
+}
+
+async function descargarTodasLasImagenes() {
+    const btn = document.getElementById('btnDescargarImagenes');
+
+    if (!allProducts || allProducts.length === 0) {
+        showToast('No hay productos para descargar.', 'info');
+        return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = `<div class="spinner"></div><span>Preparando ZIP...</span>`;
+
+    try {
+        const zip = new JSZip();
+        const carpeta = zip.folder('imagenes_productos');
+        let descargadas = 0;
+
+        for (let i = 0; i < allProducts.length; i++) {
+            const p = allProducts[i];
+            const nombre = p.nombre || p.Nombre || `producto_${i + 1}`;
+            const imagen = p.imagen || p.Imagen || '';
+
+            if (!imagen) continue;
+
+            btn.innerHTML = `<div class="spinner"></div><span>Descargando ${i + 1}/${allProducts.length}</span>`;
+
+            try {
+                const res = await fetch(imagen);
+                if (!res.ok) throw new Error('No se pudo descargar la imagen');
+
+                const blob = await res.blob();
+                const ext = obtenerExtensionDesdeUrl(imagen, blob.type);
+                const nombreArchivo = `${String(i + 1).padStart(3, '0')}_${limpiarNombreArchivo(nombre)}.${ext}`;
+
+                carpeta.file(nombreArchivo, blob);
+                descargadas++;
+            } catch (err) {
+                console.warn(`No se pudo descargar la imagen de "${nombre}"`, err);
+            }
+        }
+
+        if (descargadas === 0) {
+            throw new Error('No se pudo añadir ninguna imagen al ZIP');
+        }
+
+        btn.innerHTML = `<div class="spinner"></div><span>Generando ZIP...</span>`;
+
+        const zipBlob = await zip.generateAsync({ type: 'blob' });
+        const url = URL.createObjectURL(zipBlob);
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'urbanrocket_imagenes.zip';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+
+        URL.revokeObjectURL(url);
+
+        showToast(`✅ ZIP descargado con ${descargadas} imagen(es).`, 'success');
+    } catch (err) {
+        console.error(err);
+        showToast('Error al descargar las imágenes. Revisa las URLs o permisos CORS.', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<span>⬇️</span><span>Descargar imágenes</span>`;
+    }
+}
 
     /* ── INIT ── */
     cargarProductos();
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
 </body>
+
+
 </html>
